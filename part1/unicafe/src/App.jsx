@@ -56,6 +56,7 @@ function Statistics({ goodFeedback, neutralFeedback, badFeedback }) {
   );
 }
 
+// StatisticLine Component
 function StatisticLine({ text, value }) {
   return (
     <tr>
