@@ -1,21 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import Searchbar from "./components/Searchbar";
 import PersonForm from "./components/PersonForm";
 import Person from "./components/Person";
 
-const initialData = [
-  { id: 0, name: "Monkey D. Luffy", number: "111-1234567" },
-  { id: 2, name: "Shanks", number: "111-9876543" },
-  { id: 1, name: "Roronoa Zoro", number: "040-9876543" },
-  { id: 3, name: "Trafalgar D. Law", number: "040-1234567" },
-];
-
 export default function App() {
-  const [persons, setPersons] = useState(initialData);
+  // states
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchValue, setSearchValue] = useState("");
 
+  // Fetch data from 'http://localhost:3001/persons'
+  useEffect(() => {
+    axios.get("http://localhost:3001/persons").then((response) => {
+      const data = response.data;
+      setPersons(data);
+    });
+  }, []);
+
+  // Form submit handler
   const handleFormSubmit = (event) => {
     event.preventDefault();
     if (persons.some((person) => person.name === newName)) {
