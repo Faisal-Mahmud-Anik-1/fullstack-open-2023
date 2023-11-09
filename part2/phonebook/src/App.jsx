@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { getAll, create, deletePerson } from "./services/person";
 import Searchbar from "./components/Searchbar";
 import PersonForm from "./components/PersonForm";
 import Person from "./components/Person";
@@ -13,50 +13,64 @@ export default function App() {
 
   // Fetch data from 'http://localhost:3001/persons'
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      const data = response.data;
+    getAll().then((data) => {
       setPersons(data);
     });
   }, []);
 
-  // Form submit handler
-  const handleFormSubmit = (event) => {
+  // addPerson submit handler
+  const handleAddPerson = (event) => {
     event.preventDefault();
+
+    const personObject = {
+      name: newName,
+      number: newNumber,
+    };
+
     if (persons.some((person) => person.name === newName)) {
-      alert(`${newName} is already added on the phonebook`);
+      alert(`${newName} is already added on the phone-book`);
+      return;
     } else if (persons.some((person) => person.number === newNumber)) {
-      alert(`${newNumber} is already added on the phonebook`);
-    } else {
-      setPersons([
-        ...persons,
-        { name: newName, number: newNumber, id: persons.length + 1 },
-      ]);
+      alert(`${newNumber} is already added on the phone-book`);
+      return;
     }
-    setNewName("");
-    setNewNumber("");
+
+    create(personObject).then((returnedPerson) => {
+      setPersons([...persons, returnedPerson]);
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
+  // handleDeletePerson
+  const handleDeletePerson = (id) => {
+    const person = persons.find((person) => person.id == id);
+    const confirmed = window.confirm(`Are you sure deleted ${person.name}?`);
+    confirmed &&
+      deletePerson(id).then(() => {
+        setPersons(persons.filter((n) => n.id !== id));
+      });
+  };
+
+  // Filtered persons
   const filteredPersons = persons.filter((person) => {
     return person.name.toLowerCase().includes(searchValue.toLowerCase());
   });
 
   return (
     <div>
-      <h1>Phonebook</h1>
-
+      <h1>PhoneBook</h1>
       <Searchbar searchValue={searchValue} setSearchValue={setSearchValue} />
       <br />
-
       <PersonForm
-        onFormSubmit={handleFormSubmit}
+        onFormSubmit={handleAddPerson}
         newName={newName}
         setNewName={setNewName}
         newNumber={newNumber}
         setNewNumber={setNewNumber}
       />
       <br />
-
-      <Person persons={filteredPersons} />
+      <Person persons={filteredPersons} onDeleteHandler={handleDeletePerson} />
     </div>
   );
 }
